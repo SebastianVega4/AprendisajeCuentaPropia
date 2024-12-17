@@ -1,7 +1,8 @@
 diccionario = {
     "nombre" : 'lucas',
     "apellido" : 'dalto',
-    "subs" : 1000000
+    "subs" : 1000000,
+    "comentario": 'es una buena forma de aprender'
 }
 
 #nos devuelve un objeto dict_item

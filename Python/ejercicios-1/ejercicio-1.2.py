@@ -1,9 +1,9 @@
-
 #le pedimos al usuario que nos diga una frase (o varias)
-frase = input("Decime una frase y te calculo cuanto tardarìas si tuvieras que decirla: ")
+frase = input("Decime una frase y te calculo cuanto tardarìas si tuvieras que decirla: \n")
 
 #creamos una lista con todas las palabras de la frase (se separan cada vez que haya un espacio en blanco)
 palabras_separadas = frase.split(" ")
+print(palabras_separadas)
 
 #usamos len() para ver la cantidad de elementos que hay en la lista
 cantidad_de_palabras = len(palabras_separadas)
