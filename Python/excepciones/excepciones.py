@@ -13,12 +13,13 @@ def sumar_dos():
             print("Te pedì un numero salame, no te hagas el gracioso")
             print(f"ERROR: {e}")
         #si todo salio bien terminamos el bucle
-        else: 
+        else:
+            print("Adios")
             break
         #el finally se ejecuta siempre
-        finally: 
-            print("Esto se ejecuta siempre")
-    
+        #finally:
+        #    print("reiniciando parametros")
+
     #mostrando el resultado
     return resultado
 
