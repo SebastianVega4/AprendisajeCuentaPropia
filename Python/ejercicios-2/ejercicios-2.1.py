@@ -1,4 +1,5 @@
-#falto el profe y los pibes van a armar la clase.
+###falto el profe y los alumnos van a armar la clase.
+### el mayor va hacer el profesor y el menor el asistente
 
 #funciòn para obtener al asistente y al profesor segun la edad.
 def obtener_compañeros(cantidad_de_compañeros):
@@ -31,5 +32,4 @@ asistente,profesor = obtener_compañeros(5)
 
 #mostrando el resultado
 print(f"El profesor es: {profesor} y su asistente es {asistente}")
-    
     

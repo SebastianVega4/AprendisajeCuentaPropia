@@ -13,4 +13,3 @@ def frase(nombre,apellido,adjetivo = "Tonto"):
 
 frase_resultante = frase("Lucas","Dalto","inteligente")
 print(frase_resultante)
-

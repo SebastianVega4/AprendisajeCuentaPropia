@@ -39,7 +39,3 @@ password,primer_numero = crear_contraseña_random(981)
 #mostrando los resultados obtenidos y los datos utilizados para obtenerlo
 print(f"Tu contraseña nueva es: {password}")
 print(f"El nùmero utilizado para crearla fue: {primer_numero}")
-
-
-
-
