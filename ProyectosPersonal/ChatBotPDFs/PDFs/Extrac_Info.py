@@ -1,30 +1,22 @@
+import os
 import pdfplumber
 
 def extract_text_from_pdf(pdf_path):
+    """Extrae el texto de un archivo PDF."""
     try:
         with pdfplumber.open(pdf_path) as pdf:
-            text = ""
-            for page in pdf.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text
-            return text.strip() if text else "El PDF no contiene texto legible."
+            return " ".join(page.extract_text() for page in pdf.pages if page.extract_text())
     except Exception as e:
-        return f"Error al procesar el PDF: {e}"
+        print(f"Error al procesar {pdf_path}: {e}")
+        return ""
 
-def extract_tables_from_pdf(pdf_path):
-    try:
-        with pdfplumber.open(pdf_path) as pdf:
-            tables = []
-            for page in pdf.pages:
-                tables += page.extract_tables()
-            return tables
-    except Exception as e:
-        return f"Error al procesar las tablas: {e}"
-
-def create_txt_with_text(text, name_txt):
-    try:
-        with open(f"{name_txt}.txt", 'w', encoding="UTF-8") as archivo:
-            archivo.write(text)
-    except Exception as e:
-        print(f"Error al guardar el archivo: {e}")
+def load_pdfs_from_directory(directory):
+    """Carga todos los PDFs de un directorio y extrae su texto."""
+    documents = []
+    for file_name in os.listdir(directory):
+        if file_name.endswith('.pdf'):
+            full_path = os.path.join(directory, file_name)
+            text = extract_text_from_pdf(full_path)
+            if text:
+                documents.append({"file_name": file_name, "content": text})
+    return documents

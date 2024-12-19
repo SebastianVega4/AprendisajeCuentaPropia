@@ -7,32 +7,36 @@
 </head>
 <body>
     <h1>Chatbot de la Universidad</h1>
+    <form id="uploadForm">
+        <input type="file" name="file" accept="application/pdf">
+        <button type="submit">Cargar PDF</button>
+    </form>
     <input type="text" id="pregunta" placeholder="Escribe tu pregunta">
     <button onclick="enviarPregunta()">Preguntar</button>
     <p id="respuesta"></p>
     <p id="error"></p>
-
+    
     <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/upload', { method: 'POST', body: formData });
+            const data = await response.json();
+            alert(data.message || data.error);
+        });
+    
         async function enviarPregunta() {
             const pregunta = document.getElementById('pregunta').value;
             const respuestaElemento = document.getElementById('respuesta');
             const errorElemento = document.getElementById('error');
             respuestaElemento.innerText = "";
             errorElemento.innerText = "";
-
-            if (!pregunta.trim()) {
-                errorElemento.innerText = "Por favor, escribe una pregunta válida.";
-                return;
-            }
-
-            const response = await fetch('http://localhost:5000/chat', {
+    
+            const response = await fetch('/chat', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ pregunta })
             });
-
             const data = await response.json();
             if (data.error) {
                 errorElemento.innerText = `Error: ${data.error}`;
