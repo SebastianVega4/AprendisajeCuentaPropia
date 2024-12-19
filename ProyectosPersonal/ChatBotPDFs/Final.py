@@ -1,14 +1,13 @@
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from transformers import pipeline
-import sqlite3
 import os
 import pdfplumber
 from flask import Flask, request, jsonify
+from transformers import pipeline
 
 # Inicializar pipeline de Transformers
-qa_pipeline = pipeline("question-answering")
+qa_pipeline = pipeline("question-answering", model="mrm8488/bert-base-spanish-wwm-cased-finetuned-spa-squad2-es")
 
 # Función para responder preguntas
 def responder_pregunta(pregunta, contextos):
@@ -26,7 +25,7 @@ def buscar_contextos_relevantes(pregunta, pages, vectorizer):
     indices_relevantes = np.argsort(similitudes)[::-1][:5]
     return [pages[i] for i in indices_relevantes]
 
-# Funciones para manejo de PDFs
+# Función para extraer texto de PDFs
 def extract_text_from_pdf(pdf_path):
     try:
         with pdfplumber.open(pdf_path) as pdf:
@@ -35,6 +34,7 @@ def extract_text_from_pdf(pdf_path):
         print(f"Error al procesar {pdf_path}: {e}")
         return ""
 
+# Cargar PDFs desde la carpeta
 def load_pdfs_from_directory(directory):
     documents = []
     for file_name in os.listdir(directory):
@@ -45,50 +45,12 @@ def load_pdfs_from_directory(directory):
                 documents.append({"file_name": file_name, "content": text})
     return documents
 
-# Funciones para manejo de base de datos
-def init_db():
-    conn = sqlite3.connect("documents.db")
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS documents (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            file_name TEXT,
-            content TEXT
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-def save_to_db(file_name, content):
-    conn = sqlite3.connect("documents.db")
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO documents (file_name, content) VALUES (?, ?)", (file_name, content))
-    conn.commit()
-    conn.close()
-
 # Inicializar Flask
 app = Flask(__name__)
 
 # Variables globales
 documents = []
 vectorizer = TfidfVectorizer()
-
-@app.route("/upload", methods=["POST"])
-def upload_pdf():
-    try:
-        file = request.files['file']
-        if not file.filename.endswith('.pdf'):
-            return jsonify({"error": "Solo se permiten archivos PDF"}), 400
-
-        text = extract_text_from_pdf(file)
-        if text:
-            documents.append({"file_name": file.filename, "content": text})
-            vectorizer.fit([doc['content'] for doc in documents])
-            return jsonify({"message": "Archivo procesado correctamente"}), 200
-        else:
-            return jsonify({"error": "El archivo no contiene texto legible"}), 400
-    except Exception as e:
-        return jsonify({"error": f"Error al cargar el archivo: {e}"}), 500
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -107,5 +69,11 @@ def chat():
         return jsonify({"error": f"Error al procesar la solicitud: {e}"}), 500
 
 if __name__ == "__main__":
-    
-    app.run(debug=True)
+    print("Cargando documentos desde la carpeta PDFs...")
+    documents = load_pdfs_from_directory("./PDFs")
+    if documents:
+        print(f"{len(documents)} documentos cargados exitosamente.")
+        vectorizer.fit([doc['content'] for doc in documents])
+    else:
+        print("No se encontraron documentos en la carpeta PDFs.")
+    app.run(host="0.0.0.0", port=5000, debug=True)

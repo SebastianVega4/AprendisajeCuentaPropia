@@ -6,8 +6,18 @@
 
   # Use https://search.nixos.org/packages to find packages
   packages = [
-    pkgs.python311
-    pkgs.python311Packages.pip
+    pkgs.python310 # Python 3.10
+    pkgs.python310Packages.pip # pip package manager
+
+    # Python dependencies for your project
+    pkgs.python310Packages.numpy # Numerical operations
+    pkgs.python310Packages.scikit-learn # Machine learning and TF-IDF
+    pkgs.python310Packages.pdfplumber # PDF text extraction
+    pkgs.python310Packages.flask # Flask web framework
+    pkgs.python310Packages.transformers # Hugging Face Transformers library
+    pkgs.python310Packages.torch # PyTorch for machine learning models
+
+    # Optional: Node.js if required for frontend development (uncomment if needed)
     # pkgs.nodejs_20
     # pkgs.nodePackages.nodemon
   ];
@@ -17,6 +27,7 @@
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
+      # Example: Uncomment if you use Vim for editing
       # "vscodevim.vim"
     ];
 
@@ -24,13 +35,11 @@
     previews = {
       enable = true;
       previews = {
+        # Uncomment and configure if your project uses a development server
         # web = {
-        #   # Example: run "npm run dev" with PORT set to IDX's defined port for previews,
-        #   # and show it in IDX's web preview panel
         #   command = ["npm" "run" "dev"];
         #   manager = "web";
         #   env = {
-        #     # Environment variables to set for your server
         #     PORT = "$PORT";
         #   };
         # };
@@ -41,13 +50,13 @@
     workspace = {
       # Runs when a workspace is first created
       onCreate = {
-        # Example: install JS dependencies from NPM
-        # npm-install = "npm install";
+        # Example: Install Python dependencies
+        pip-install = "pip install -r requirements.txt";
       };
       # Runs when the workspace is (re)started
       onStart = {
-        # Example: start a background task to watch and re-build backend code
-        # watch-backend = "npm run watch-backend";
+        # Example: Run Flask development server
+        flask-server = "python main.py";
       };
     };
   };
