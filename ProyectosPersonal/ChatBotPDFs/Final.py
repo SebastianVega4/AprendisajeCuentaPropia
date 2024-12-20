@@ -6,6 +6,7 @@ import pdfplumber
 from flask import Flask, request, jsonify
 from transformers import pipeline
 
+
 # Inicializar pipeline de Transformers
 qa_pipeline = pipeline("question-answering", model="mrm8488/bert-base-spanish-wwm-cased-finetuned-spa-squad2-es")
 
