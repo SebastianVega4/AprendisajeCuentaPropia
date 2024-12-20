@@ -6,27 +6,34 @@ import pdfplumber
 from flask import Flask, request, jsonify, send_from_directory
 from transformers import pipeline
 
-# Función para inicializar el modelo
 def cargar_modelo():
     """
-    Inicializa el pipeline de Transformers para la tarea de Question Answering.
+    Inicializa el modelo con el pipeline de Transformers.
     """
     try:
         print("Cargando el modelo...")
-        qa_pipeline = pipeline(
+        return pipeline(
             "question-answering",
-            model="mrm8488/bert-base-spanish-wwm-cased-finetuned-spa-squad2-es"
+            model="mrm8488/bert-base-spanish-wwm-cased-finetuned-spa-squad2-es",
+            device=-1  # Asegura el uso de la CPU
         )
-        print("Modelo cargado exitosamente.")
-        return qa_pipeline
     except Exception as e:
         print(f"Error al cargar el modelo: {e}")
         return None
 
-# Función para responder preguntas
+def dividir_texto(texto, max_longitud=500):
+    """
+    Divide el texto en fragmentos más pequeños para facilitar el procesamiento.
+    """
+    palabras = texto.split()
+    fragmentos = []
+    for i in range(0, len(palabras), max_longitud):
+        fragmentos.append(" ".join(palabras[i:i + max_longitud]))
+    return fragmentos
+
 def responder_pregunta(pregunta, contextos):
     """
-    Genera respuestas para una pregunta dada utilizando los contextos relevantes.
+    Genera respuestas usando el pipeline y los contextos relevantes.
     """
     respuestas = []
     for contexto in contextos:
@@ -39,10 +46,9 @@ def responder_pregunta(pregunta, contextos):
         return max(respuestas, key=lambda x: x['score'])
     return {"answer": "No se encontró una respuesta adecuada.", "score": 0.0}
 
-# Función para buscar contextos relevantes usando TF-IDF
 def buscar_contextos_relevantes(pregunta, pages, vectorizer):
     """
-    Busca los contextos más relevantes para una pregunta usando similitud coseno y TF-IDF.
+    Busca contextos relevantes utilizando TF-IDF.
     """
     pregunta_vectorizada = vectorizer.transform([pregunta]).toarray()
     pages_vectorizadas = vectorizer.transform(pages).toarray()
@@ -50,10 +56,9 @@ def buscar_contextos_relevantes(pregunta, pages, vectorizer):
     indices_relevantes = np.argsort(similitudes)[::-1][:5]
     return [pages[i] for i in indices_relevantes]
 
-# Función para extraer texto de PDFs
 def extract_text_from_pdf(pdf_path):
     """
-    Extrae el texto de un archivo PDF.
+    Extrae el texto de un PDF.
     """
     try:
         with pdfplumber.open(pdf_path) as pdf:
@@ -65,10 +70,9 @@ def extract_text_from_pdf(pdf_path):
         print(f"Error al procesar {pdf_path}: {e}")
         return ""
 
-# Cargar PDFs desde la carpeta
 def load_pdfs_from_directory(directory):
     """
-    Carga y procesa todos los archivos PDF en un directorio.
+    Carga documentos PDF desde un directorio.
     """
     documents = []
     for file_name in os.listdir(directory):
@@ -79,26 +83,17 @@ def load_pdfs_from_directory(directory):
                 documents.append({"file_name": file_name, "content": text})
     return documents
 
-# Inicializar Flask
 app = Flask(__name__)
-
-# Variables globales
 qa_pipeline = None
 documents = []
-vectorizer = TfidfVectorizer()
+vectorizer = TfidfVectorizer(max_features=5000, max_df=0.8)
 
 @app.route("/")
 def home():
-    """
-    Ruta principal para servir el archivo HTML de interfaz.
-    """
     return send_from_directory('.', 'index.html')
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    """
-    Endpoint para manejar preguntas y devolver respuestas.
-    """
     try:
         data = request.get_json()
         if not data or "pregunta" not in data:
@@ -122,24 +117,21 @@ def chat():
         return jsonify({"error": f"Error al procesar la solicitud: {str(e)}"}), 500
 
 if __name__ == "__main__":
-    # Inicializa documentos y modelo en el bloque principal
     print("Iniciando aplicación...")
-
-    # Cargar modelo
     qa_pipeline = cargar_modelo()
-
     if not qa_pipeline:
-        print("Error crítico: No se pudo cargar el modelo. Saliendo.")
+        print("Error crítico: No se pudo cargar el modelo.")
         exit(1)
 
-    # Cargar documentos
     print("Cargando documentos desde la carpeta PDFs...")
     documents = load_pdfs_from_directory("./PDFs")
-    if documents:
+    fragmentos = []
+    for doc in documents:
+        fragmentos.extend(dividir_texto(doc['content']))
+    if fragmentos:
+        vectorizer.fit(fragmentos)
         print(f"{len(documents)} documentos cargados exitosamente.")
-        vectorizer.fit([doc['content'] for doc in documents])
     else:
-        print("No se encontraron documentos en la carpeta PDFs. El servidor se ejecutará, pero no podrá responder preguntas.")
+        print("No se encontraron documentos.")
 
-    # Iniciar aplicación Flask
     app.run(host="0.0.0.0", port=5000, debug=True)
