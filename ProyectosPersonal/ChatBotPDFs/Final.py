@@ -86,14 +86,16 @@ def chat():
         return jsonify({"error": f"Error al procesar la solicitud: {str(e)}"}), 500
 
 if __name__ == "__main__":
-    try:
-        print("Cargando documentos desde la carpeta PDFs...")
-        documents = load_pdfs_from_directory("./PDFs")
-        if documents:
-            print(f"{len(documents)} documentos cargados exitosamente.")
-            vectorizer.fit([doc['content'] for doc in documents])
-        else:
-            print("No se encontraron documentos en la carpeta PDFs. El servidor se ejecutará, pero no podrá responder preguntas.")
-    except Exception as e:
-        print(f"Error al cargar documentos: {e}")
+    from transformers import pipeline
+
+    # Inicializa documentos y vectorizador
+    print("Cargando documentos desde la carpeta PDFs...")
+    documents = load_pdfs_from_directory("./PDFs")
+    if documents:
+        print(f"{len(documents)} documentos cargados exitosamente.")
+        vectorizer.fit([doc['content'] for doc in documents])
+    else:
+        print("No se encontraron documentos en la carpeta PDFs. El servidor se ejecutará, pero no podrá responder preguntas.")
+
+    # Inicializa Flask
     app.run(host="0.0.0.0", port=5000, debug=True)
