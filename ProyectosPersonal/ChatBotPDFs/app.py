@@ -4,6 +4,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import os
 import pdfplumber
 from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 from transformers import pipeline
 
 def cargar_modelo():
@@ -84,6 +85,7 @@ def load_pdfs_from_directory(directory):
     return documents
 
 app = Flask(__name__)
+CORS(app)  # Configuración de CORS
 qa_pipeline = None
 documents = []
 vectorizer = TfidfVectorizer(max_features=5000, max_df=0.8)
@@ -95,24 +97,34 @@ def home():
 @app.route("/chat", methods=["POST"])
 def chat():
     try:
+        # Obtener datos JSON de la solicitud
         data = request.get_json()
+        print(f"Datos recibidos: {data}")  # Log para depuración
+
+        # Validar que el JSON contiene el campo 'pregunta'
         if not data or "pregunta" not in data:
             return jsonify({"error": "Entrada no válida. Se requiere un campo 'pregunta'."}), 400
 
+        # Validar que la pregunta no esté vacía
         pregunta = data["pregunta"].strip()
         if not pregunta:
             return jsonify({"error": "La pregunta no puede estar vacía."}), 400
 
+        # Verificar si hay documentos cargados
         if not documents:
-            return jsonify({"error": "No hay datos cargados"}), 400
+            return jsonify({"error": "No hay datos cargados."}), 400
 
+        # Buscar contextos relevantes
         contextos = buscar_contextos_relevantes(pregunta, [doc['content'] for doc in documents], vectorizer)
         if not contextos:
             return jsonify({"answer": "No se encontraron contextos relevantes.", "score": 0.0}), 200
 
+        # Generar respuesta con el modelo
         respuesta = responder_pregunta(pregunta, contextos)
         return jsonify({"answer": respuesta['answer'], "score": respuesta['score']}), 200
+
     except Exception as e:
+        # Manejar errores inesperados
         print(f"Error: {e}")
         return jsonify({"error": f"Error al procesar la solicitud: {str(e)}"}), 500
 
