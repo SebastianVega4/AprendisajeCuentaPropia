@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Universidad</title>
+    <!-- Google Fonts para una mejor tipografía -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Enlazar con Bootstrap para diseño responsivo -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ1QK5L6OlXxNjvJYmmFfslgqpgp2f74HujVtBKn5F6gPhYXoVRaDlCl1H1D" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Roboto', sans-serif;
+            color: #4a4a4a;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 450px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            color: #0d6efd;
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        #pregunta {
+            border-radius: 25px;
+            padding: 12px 20px;
+            border: 1px solid #ced4da;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        #pregunta:focus {
+            border-color: #0d6efd;
+            outline: none;
+            box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+        }
+
+        button {
+            margin-top: 10px;
+            border-radius: 25px;
+            font-size: 1rem;
+            padding: 12px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #004085;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .loading img {
+            width: 40px;
+        }
+
+        .response-box {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #respuesta {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            color: #0d6efd;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        #error {
+            color: #dc3545;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-box">
+            <h1>Chatbot de la Universidad</h1>
+            <div class="input-group">
+                <input type="text" id="pregunta" class="form-control" placeholder="Escribe tu pregunta">
+            </div>
+            <button onclick="enviarPregunta()" id="submitButton">Preguntar</button>
+            <div class="loading">
+                <img src="https://i.gifer.com/ZZ5H.gif" alt="Cargando...">
+                <p>Cargando respuesta...</p>
+            </div>
+            <div class="response-box">
+                <p id="respuesta"></p>
+                <p id="error"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function enviarPregunta() {
+            const pregunta = document.getElementById('pregunta').value.trim();
+            const respuestaElemento = document.getElementById('respuesta');
+            const errorElemento = document.getElementById('error');
+            const loadingElemento = document.querySelector('.loading');
+            const boton = document.querySelector("#submitButton");
+
+            respuestaElemento.innerText = "";
+            errorElemento.innerText = "";
+
+            if (!pregunta) {
+                errorElemento.innerText = "Por favor, escribe una pregunta.";
+                return;
+            }
+
+            // Mostrar carga
+            loadingElemento.style.display = "block";
+            boton.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5000/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pregunta })
+                });
+                const data = await response.json();
+
+                // Ocultar carga
+                loadingElemento.style.display = "none";
+                if (data.error) {
+                    errorElemento.innerText = `Error: ${data.error}`;
+                } else {
+                    respuestaElemento.innerText = `Respuesta: ${data.answer}`;
+                }
+            } catch (error) {
+                // Ocultar carga
+                loadingElemento.style.display = "none";
+                errorElemento.innerText = `Error al comunicarse con el servidor: ${error.message}`;
+            } finally {
+                boton.disabled = false;
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-GLhlTQ8iRABW8U02d8jOt6G30bxrVZ/hZ4d8BX5xB0/VyX5Ck2CsXKlg7/hC7aW2" crossorigin="anonymous"></script>
+</body>
+</html>
