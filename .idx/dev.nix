@@ -3,7 +3,7 @@
   packages = [
     pkgs.python310
     pkgs.python310Packages.pip 
-    pkgs.python310Packages.numpy
+    #pkgs.python310Packages.numpy
     #pkgs.python310Packages.scikit-learn
     #pkgs.python310Packages.pdfplumber
     #pkgs.python310Packages.flask
