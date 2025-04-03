@@ -1,4 +1,11 @@
 # CursoAlura
-Alura Latam | formacion spring framework grupo 5 one
+Repositorio de Aprendizaje Autonome
 
-Tambien indago y creo proyectos personales segun lo aprendido
+-Alura Latam | formacion spring framework grupo 5 one
+-ChatBot Python
+-Cursos Platzy
+-AceptaElReto.com
+-Python
+-C#
+-C++
+-Html
