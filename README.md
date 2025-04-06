@@ -46,9 +46,6 @@ Desarrollado por **Sebastián Vega**
 🔗 [LinkedIn - Johan Sebastián Vega Ruiz](https://www.linkedin.com/in/johan-sebastian-vega-ruiz-b1292011b/)
 
 ---
- 
-Facultad de Ingeniería — Ingeniería de Sistemas 🧩
-**🏫 Universidad Pedagógica y Tecnológica de Colombia**  
-📍 Sogamoso, Boyacá 📍
+📍 Duitama, Boyacá 📍
 
-© 2025 — Universidad Pedagógica y Tecnológica de Colombia (UPTC) 
+© 2025 — Sebastian Vega
