@@ -1,0 +1,10 @@
+
+<section>
+    @if (session) {
+        <p>Bienvenido, iniciaste sesion como {{name}}</p>
+        <button (click)="session= false">Log out</button>
+    }@else {
+        <p>No estas logueado</p>
+        <button (click)="session= true" (click)="getName()">Log in</button>
+    }
+</section>
