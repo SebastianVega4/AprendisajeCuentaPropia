@@ -1,5 +1,10 @@
 python -m spacy download es_core_news_sm
 
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+
+
+
 python310
 
 pip install numpy
